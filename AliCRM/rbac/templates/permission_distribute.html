@@ -1,0 +1,177 @@
+{% extends 'BASE.html' %}
+{% load static %}
+{% block head %}
+    {{ block.super }}
+{% endblock head %}
+{% block title %}
+    客户跟进信息
+{% endblock title %}
+{% block content %}
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title"></h3>
+                    <div class="col-sm-2  user-area">
+                        <div class="box">
+                            <div class="box-header">
+                                <h3 class="box-title"><i class="fa fa-user"> 用户表</i></h3>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body no-padding">
+                                <table class="table text-center">
+                                    <tbody>
+                                    <tr>
+                                        <th>用户选择</th>
+                                    </tr>
+                                    {% for user in all_user %}
+                                        <tr class={% if user.pk|safe == uid %} "active danger" {% endif %}>
+                                            <td><a class="btn btn-info btn-xs"
+                                                   href="?uid={{ user.pk }}">{{ user.username }}</a></td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /.box-body -->
+                        </div>
+                    </div>
+                    <div class="col-sm-3  identity-area">
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="postType" value="permission">
+                            <div class="box">
+
+                                <div class="box-header">
+                                    <h3 class="box-title"><i class="fa fa-id-card"> 角色表</i></h3>
+                                    {% if uid %}
+                                        <button class="btn btn-warning pull-right">保存</button>
+                                    {% endif %}
+                                </div>
+                                <!-- /.box-header -->
+                                <div class="box-body no-padding">
+                                    <table class="table text-center">
+                                        <tbody>
+                                        <tr>
+                                            <th>角色</th>
+                                            <th>选择</th>
+                                        </tr>
+                                        {% load rbac %}
+                                        {% for role in all_role %}
+                                            <tr class={% if role.pk|safe == rid %} "active danger" {% endif %}>
+                                                <td><a class="btn btn-info btn-xs"
+                                                       href="?{% get_role_url request role.pk %}">{{ role.get_title_display }}</a>
+                                                </td>
+                                                {% if role.pk in all_role_list %}
+                                                    <td><input type="checkbox" name="role_id" checked
+                                                               value="{{ role.pk }}"></td>
+                                                {% else %}
+                                                    <td><input type="checkbox" name="role_id" value="{{ role.pk }}">
+                                                    </td>
+                                                {% endif %}
+
+                                            </tr>
+                                        {% endfor %}
+
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- /.box-body -->
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-sm-5  permission-area">
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="postType" value="permission">
+                            <div class="box">
+                                <div class="box-header success">
+                                    <h3 class="box-title"><i class="fa fa-cubes"> 权限表</i></h3>
+                                    {% if rid %}
+                                        <button class="btn btn-warning pull-right">保存</button>
+                                    {% endif %}
+                                </div>
+                                <!-- /.box-header -->
+                                <div class="box-body no-padding">
+                                    <table class="table">
+                                        <tbody>
+                                        <tr>
+                                            <th>一级</th>
+                                            <th>二级</th>
+                                            <th>子权限</th>
+                                        </tr>
+                                        {% for permission in all_permission %}
+
+                                            {% if not permission.parent %}
+                                                <tr>
+                                                    <td class="btn-default master"><input type="checkbox"
+                                                                                          name="permission_id"
+                                                            {% if permission.pk in all_permission_list %}
+                                                                                          checked {% endif %}
+                                                                                          value="{{ permission.pk }}">{{ permission.name }}
+                                                    </td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                            {% else %}
+                                                {% if permission.show %}
+                                                    <tr>
+                                                        <td></td>
+                                                        <td><input type="checkbox" name="permission_id"
+                                                                {% if permission.pk in all_permission_list %}
+                                                                   checked {% endif %}
+                                                                   value="{{ permission.pk }}">{{ permission.name }}
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                {% else %}
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td><input type="checkbox" name="permission_id"
+                                                                {% if permission.pk in all_permission_list %}
+                                                                   checked {% endif %}
+                                                                   value="{{ permission.pk }}">{{ permission.name }}
+                                                        </td>
+                                                    </tr>
+                                                {% endif %}
+
+                                            {% endif %}
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- /.box-body -->
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+        <!-- /.col -->
+    </div>
+{% endblock content %}
+{% block js %}
+    {{ block.super }}
+{% endblock js %}
+
+{% block customjs %}
+    <script>
+        $("[name=batch_choose]").click(function () {
+            var status = $(this).prop("checked");
+            $("[name=choose]").prop('checked', status)
+        });
+    </script>
+
+    <script>
+        $("#master").click(function () {
+
+        })
+    </script>
+    {{ jump_js|safe }}
+{% endblock customjs %}

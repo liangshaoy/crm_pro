@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<form action="{% url 'test' %}" method="post">
+    {% csrf_token %}
+    用户名：<input type="text" name="username">
+    密码：<input type="password" name="password">
+    <input type="button" id="loginBtn" value="login">
+</form>
+
+<script src="{% static 'adminlte/bower_components/jquery/dist/jquery.min.js' %}"></script>
+<script>
+    $("#loginBtn").on("click",function () {
+        var username = $("[name=username]").val();
+        var password = $("[name=password]").val();
+        var csrf_token = $("[name=csrfmiddlewaretoken]").val();
+        $.ajax({
+            url:"{% url 'test' %}",
+            type:"post",
+            data:{
+                username:username,
+                password:password,
+                csrfmiddlewaretoken:csrf_token,
+            },
+            success:function (res) {
+                console.log(res)
+            }
+        })
+    })
+</script>
+</body>
+</html>

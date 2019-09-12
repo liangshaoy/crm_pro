@@ -1,0 +1,159 @@
+{% extends 'BASE.html' %}
+{% load static %}
+{% block head %}
+    {{ block.super }}
+{% endblock head %}
+{% block title %}
+    报名信息展示
+{% endblock title %}
+{% block content %}
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title"></h3>
+                    <form action="" method="get" class="navbar-form navbar-left">
+                        <div class="input-group">
+                            <div class="input-group-btn btn-info">
+                                <select name="condition" id="search" class="btn input-group-sm btn-info"
+                                        style="border: 0">
+                                    <option value="" readonly>条件</option>
+                                    <option value="qq_name">昵称</option>
+                                    <option value="qq">QQ号</option>
+                                </select>
+                            </div>
+                            <input type="text" name="q" class="form-control" placeholder="Search...">
+                            <span class="input-group-btn">
+                                <button type="submit" id="search-btn" class="btn btn-flat">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </form>
+
+                </div>
+
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+
+
+                        </div>
+                    </div>
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        <div class="input-group" style="width: 220px;margin-bottom: 5px;margin-left: 15px">
+                            <select name="operate" id="operate" class="form-control btn-default">
+                                <option value="">选择批量操作</option>
+                                <option value="batch_delete">批量删除</option>
+                                <option value="batch_update">批量更改客户状态</option>
+                                <option value="batch_c2p">批量公转私</option>
+
+                            </select>
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-warning btn-flat">Go!</button>
+                            </span>
+                        </div>
+
+
+                        <table id="example2" class="table table-bordered table-hover text-center">
+                            <thead>
+                            <tr>
+                                <th style="width: 6%">
+                                    <button type="button" class="btn btn-info btn-xs"><span>批量</span><input
+                                            type="checkbox" name="batch_choose"></button>
+                                </th>
+                                <th style="width: 5%">序号</th>
+                                <th>姓名</th>
+                                <th>报名原因</th>
+                                <th>学习期望</th>
+                                <th>报名日期</th>
+                                <th>备注</th>
+                                <th>学校</th>
+                                <th>班级</th>
+                                {% load rbac %}
+                                {% if "/crmweb/consult/record/edit/1/"|has_permission:request or "/crmweb/consult/record/del/1/"|has_permission:request %}
+                                    <th>操作</th>
+                                {% endif %}
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for customer in all_customers %}
+                                <tr>
+                                    <td><input type="checkbox" name="choose" value="{{ customer.pk }}"></td>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ customer.customer }}</td>
+                                    <td>{{ customer.why }}</td>
+                                    <td>
+                                        {{ customer.expectation|default:"暂无" }}
+                                    </td>
+                                    <td>{{ customer.enrolled_date|date:'Y-m-d' }}</td>
+                                    <td>{{ customer.note|default:"暂无" }}</td>
+                                    <td>{{ customer.school }}</td>
+                                    <td>{{ customer.enrollment_class }}</td>
+                                    {% load rbac %}
+                                    {% if "/crmweb/consult/record/edit/1/"|has_permission:request or "/crmweb/consult/record/del/1/"|has_permission:request %}
+                                        <td>
+                                            {% if "/crmweb/consult/record/edit/1/"|has_permission:request %}
+                                                <a style="color: #00c3cc;"
+                                                   href="{% url 'customer_common_edit' customer.pk %}">
+                                                    <i class="fa fa-edit" aria-hidden="true"></i>
+                                                </a>
+                                            {% endif %}
+                                            {% if "/crmweb/consult/record/edit/1/"|has_permission:request and "/crmweb/consult/record/del/1/"|has_permission:request %}
+                                                |
+                                            {% endif %}
+                                            {% if "/crmweb/consult/record/del/1/"|has_permission:request %}
+                                                <a style="color: #d9534f;"
+                                                   href="{% url 'customer_common_del' customer.pk %}">
+                                                    <i class="fa fa-trash-o"></i>
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+
+                            </tbody>
+                            <tfoot>
+                            </tfoot>
+                        </table>
+                        {% if not all_customers %}
+                            <h3 class="text-center">没有相关记录！</h3>
+                        {% endif %}
+                    </form>
+
+
+                    <div class="pull-right" style="display:inline-block; width: 120px;margin: 22px 10px">
+                        {{ jump_tag|safe }}
+                    </div>
+
+                    <div class="pull-right">
+                        {{ paginator_tag|safe }}
+                    </div>
+
+
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+        <!-- /.col -->
+    </div>
+{% endblock content %}
+{% block js %}
+    {{ block.super }}
+{% endblock js %}
+
+{% block customjs %}
+    <script>
+        $("[name=batch_choose]").click(function () {
+            var status = $(this).prop("checked");
+            $("[name=choose]").prop('checked', status)
+        });
+        $("#choose_error").click(function () {
+            $("#choose_error").css("display", "none");
+        })
+    </script>
+    {{ jump_js|safe }}
+{% endblock customjs %}

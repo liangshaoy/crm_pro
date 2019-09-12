@@ -1,0 +1,126 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static 'bootstrap-3.3.7-dist/css/bootstrap.min.css' %}">
+    <script src="{% static 'adminlte/bower_components/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'bootstrap-3.3.7-dist/js/bootstrap.min.js' %}"></script>
+    <style>
+        .container-fluid {
+            margin-top: 30px;
+        }
+        .panel{
+            margin-top: 200px;
+        }
+    </style>
+</head>
+<body>
+
+<div style="position: absolute;z-index: 10;width: 100%;height: 100%">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-8 col-sm-offset-2">
+                <!--============================导航栏===========================-->
+                <!--==============================注册提交表单==========================-->
+            </div>
+            <div class="col-sm-4 col-xs-offset-4">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h4 style="text-align: center">修改密码</h4>
+                    </div>
+                    <form class="form-horizontal" action="{% url 'change_pwd' %}" method="post" novalidate>
+                        <div class="panel-body">
+                            <div class="col-sm-11">
+                                {% csrf_token %}
+                                {% for field in form_obj %}
+                                    <div class="form-group {% if field.errors %} has-error {% endif %}">
+                                        <label for="{{ field.id_for_label }}"
+                                               class="col-sm-3 control-label">{{ field.label }}</label>
+                                        <div class="col-sm-9">
+                                            {{ field }}
+                                            <span style="color:#b14442">{{ field.errors.0 }}</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="code">验证码</label>
+
+                                    <div class="col-sm-4">
+                                        <input type="text" id="authcode" name="authcode" class="form-control">
+                                        <span class="authcode-error" style="color:#b14442"></span>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <img id="authimg" src="{% url 'get_auth_img' %}" alt="验证码">
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="panel-footer" style="height: 55px">
+                            <div class="col-sm-10 col-sm-offset-1">
+                                <a href="{% url 'user_center' %}" class="btn btn-primary pull-left">cancle</a>
+                                <input type="submit" class="btn btn-success pull-right" value="change">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // 登录ajax请求
+    $("#loginBtn").on("click", function () {
+        var username = $("[name=username]").val();
+        var password = $("[name=password]").val();
+        var authcode = $("[name=authcode]").val();
+        if (!username) {
+            $(".username-error").text("帐号不能为空！")
+        }
+        if (!password) {
+            $(".password-error").text("密码不能为空！")
+        }
+        if (!authcode) {
+            $(".authcode-error").text("请输入验证码")
+        }
+        if (username && password && authcode) {
+            $.ajax({
+                url: "{% url 'login' %}",
+                type: "post",
+                data: {
+                    csrfmiddlewaretoken: $("[name=csrfmiddlewaretoken]").val(),
+                    username: username,
+                    password: password,
+                    authcode: authcode,
+                },
+                success: function (res) {
+                    if (res.status === "1") {
+                        $(".authcode-error").text("验证码错误！")
+                    }
+                    if (res.status === "2") {
+                        location.href = res.url
+                    }
+                    if (res.status === "3") {
+                        $(".username-error").text("账号或密码错误！")
+                    }
+                }
+            })
+        }
+    });
+
+    // 验证码刷新
+    $("#authimg").on("click", function () {
+        $("#authimg")[0].src += "?"
+    })
+
+</script>
+
+</body>
+</html>
